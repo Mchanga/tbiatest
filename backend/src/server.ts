@@ -5,11 +5,11 @@ import pino from "pino";
 
 const logger = pino({ level: process.env.LOG_LEVEL || "info" });
 
-const { PORT, LOG_LEVEL } = loadEnv();
-logger.level = LOG_LEVEL;
-
 async function startServer(): Promise<void> {
-  try {
+  try {
+    const { PORT, LOG_LEVEL } = loadEnv();
+    logger.level = LOG_LEVEL;
+
     await pool.query("SELECT 1");
 
     const server = app.listen(PORT, () => {
@@ -50,7 +50,14 @@ async function startServer(): Promise<void> {
     process.on("SIGTERM", () => shutdown("SIGTERM"));
 
   } catch (error) {
-    logger.error({ errorName: error instanceof Error ? error.name : "UnknownError" }, "Unable to start TBIA backend");
+    logger.error(
+      {
+        errorName: error instanceof Error ? error.name : "UnknownError",
+        errorMessage:
+          error instanceof Error ? error.message : "Unknown startup error",
+      },
+      "Unable to start TBIA backend",
+    );
 
     await pool.end();
     process.exitCode = 1;

@@ -40,6 +40,9 @@ export const loadEnv = () => {
   }
 
   if (parsed.data.NODE_ENV === "production") {
+    if (["localhost", "127.0.0.1", "::1"].includes(parsed.data.DB_HOST.toLowerCase())) {
+      throw new Error("DB_HOST must point to a database reachable from the production service");
+    }
     if (!parsed.data.DB_PASSWORD || parsed.data.DB_PASSWORD.startsWith("replace-with-")) {
       throw new Error("A production DB_PASSWORD must be configured");
     }
@@ -49,6 +52,9 @@ export const loadEnv = () => {
     const origins = parsed.data.CORS_ORIGIN.split(",").map((origin) => origin.trim());
     if (origins.some((origin) => !origin.startsWith("https://"))) {
       throw new Error("All production CORS_ORIGIN values must use HTTPS");
+    }
+    if (!parsed.data.FRONTEND_URL.startsWith("https://")) {
+      throw new Error("FRONTEND_URL must use HTTPS in production");
     }
     if (!parsed.data.PUBLIC_API_URL || !parsed.data.PUBLIC_API_URL.startsWith("https://")) {
       throw new Error("PUBLIC_API_URL must be an HTTPS URL in production");
