@@ -44,7 +44,6 @@ services:
   - type: web
     name: tbiatest
     runtime: static
-    plan: free
     rootDir: Frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
